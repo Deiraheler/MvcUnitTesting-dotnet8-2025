@@ -2,6 +2,8 @@
 using MvcUnitTesting_dotnet8.Models;
 using MvcUnitTesting_dotnet8.Controllers;
 using Microsoft.AspNetCore.Mvc;
+using Telerik.JustMock.Helpers;
+using System.Linq.Expressions;
 
 
 namespace MvcUnitTesting.Tests.Controllers
@@ -62,6 +64,34 @@ namespace MvcUnitTesting.Tests.Controllers
             Assert.AreEqual("Fiction", result.ViewData["Genre"], "Genre should match 'Fiction'.");
         }
 
+        [TestMethod]
+        public void test_book_by_genre()
+        {
+            // Arrange
+            var mockRepo = Telerik.JustMock.Mock.Create<IRepository<Book>>();
+            var allBooks = new List<Book>
+            {
+                new Book { ID = 1, Name = "Fiction1", Genre = "Fiction" },
+                new Book { ID = 2, Name = "Fiction2", Genre = "Fiction" },
+                new Book { ID = 3, Name = "NonFiction1", Genre = "Non-Fiction" },
+            };
+
+            Telerik.JustMock.Mock
+        .Arrange(() => mockRepo.Find(Telerik.JustMock.Arg.IsAny<Expression<Func<Book, bool>>>()))
+        .Returns((Expression<Func<Book, bool>> predicate) =>
+            allBooks.Where(predicate.Compile()));
+
+            var controller = new HomeController(mockRepo, null);
+
+            // Act
+            // Calls controller.Index("Fiction"), which does _repository.Find(b => b.Genre == "Fiction")
+            var result = controller.Index("Fiction") as ViewResult;
+            var model = result?.Model as IEnumerable<Book>;
+
+            // Assert
+            Assert.IsNotNull(model, "Model should not be null.");
+            Assert.AreEqual(2, model.Count(), "Should return exactly 2 Fiction books.");
+        }
 
 
     }

@@ -20,10 +20,19 @@ namespace MvcUnitTesting_dotnet8.Controllers
         
         public IActionResult Index(string genre)
         {
-            ViewData["Genre"] = !string.IsNullOrEmpty(genre) ? genre : "All";
-
-            var books = repository.GetAll();
-            return View(books);
+            if (!string.IsNullOrWhiteSpace(genre))
+            {
+                ViewData["Genre"] = genre;
+                // Use the Find method to filter by genre
+                var books = repository.Find(b => b.Genre == genre);
+                return View(books);
+            }
+            else
+            {
+                ViewData["Genre"] = "All";
+                var allBooks = repository.GetAll();
+                return View(allBooks);
+            }
         }
 
         public IActionResult Privacy()
