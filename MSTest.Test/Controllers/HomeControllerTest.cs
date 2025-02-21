@@ -56,7 +56,7 @@ namespace MvcUnitTesting.Tests.Controllers
             HomeController controller = new HomeController(mockRepo, null);
 
             // Act
-            ViewResult result = controller.Index() as ViewResult;
+            ViewResult result = controller.Index("Fiction") as ViewResult;
 
             // Assert
             Assert.AreEqual("Fiction", result.ViewData["Genre"], "Genre should match 'Fiction'.");
